@@ -1,0 +1,8 @@
+<!--
+  Merge these keys into ios/Runner/Info.plist after running
+  `flutter create .`. Kept separate so flutter_create doesn't overwrite them.
+-->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Brolly uses your location to show the weather and radar where you are.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Brolly uses your location to show the weather and radar where you are.</string>

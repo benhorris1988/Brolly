@@ -1,0 +1,9 @@
+<!--
+  These permissions must be merged into the AndroidManifest.xml that
+  `flutter create .` generates. They're kept as a fragment because
+  `flutter create` would otherwise overwrite the file.
+-->
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>

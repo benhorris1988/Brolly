@@ -1,0 +1,3 @@
+# Drop weather condition icon PNGs here if you want to replace the
+# Material Icons used by default. Naming convention: lower_snake_case
+# matching WeatherCondition enum names (e.g. partly_cloudy.png).
