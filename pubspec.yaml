@@ -18,12 +18,14 @@ dependencies:
 
   # Networking + serialization
   dio: ^5.7.0
-  retrofit: ^4.4.1
+  retrofit: ^4.9.2
   json_annotation: ^4.9.0
 
   # Map + radar
   flutter_map: ^7.0.2
   flutter_map_cancellable_tile_provider: ^3.0.2
+  maplibre: ^0.3.5
+  pointer_interceptor: ^0.10.1+2
   latlong2: ^0.9.1
 
   # Location
@@ -40,11 +42,17 @@ dependencies:
   # Images
   cached_network_image: ^3.4.1
 
+  # Weather icons (Erik Flowers' Weather Icons font)
+  weather_icons: ^3.0.0
+
+  # AdMob — Android/iOS only. The widget gracefully no-ops on web.
+  google_mobile_ads: ^8.0.0
+
   # Routing
   go_router: ^14.2.7
 
   # Formatting / env
-  intl: ^0.19.0
+  intl: ^0.20.2
   flutter_dotenv: ^5.1.0
 
   # Misc
@@ -59,7 +67,7 @@ dev_dependencies:
 
   # Code generation
   build_runner: ^2.4.13
-  retrofit_generator: ^9.1.2
+  retrofit_generator: ^10.2.6
   json_serializable: ^6.8.0
   drift_dev: ^2.20.3
 

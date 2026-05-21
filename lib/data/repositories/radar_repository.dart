@@ -33,15 +33,34 @@ class RadarRepository {
     return <RainViewerFrame>[...m.radar.past, ...m.radar.nowcast];
   }
 
+  /// Build the satellite infrared cloud-cover tile URL. RainViewer expects
+  /// `colorScheme = 0` for the standard greyscale infrared rendering;
+  /// `options` are unused but kept at `0_0` to match the URL grammar.
+  String satelliteTileUrlTemplate(
+    RainViewerManifest manifest,
+    RainViewerFrame frame, {
+    int size = 512,
+    int colorScheme = 0,
+  }) {
+    return '${manifest.host}${frame.path}/$size/{z}/{x}/{y}/$colorScheme/0_0.png';
+  }
+
   /// Build a flutter_map tile-template URL for a given frame.
   ///
-  /// `colorScheme = 2` is RainViewer's universal blue palette, which matches
-  /// the brand. `1_1` means smoothing on, snow on.
+  /// `colorScheme = 3` is RainViewer's "Weather Channel" green/yellow/red
+  /// palette — the classic radar look most users recognise, and it stays
+  /// readable over both light and dark map backgrounds. `1_1` means
+  /// smoothing on, snow on.
+  ///
+  /// Default `size = 512` matches MapLibre's reference tile size, so on
+  /// high-DPI displays the renderer fetches at exactly the camera zoom
+  /// instead of overzooming by one level (which would push us past
+  /// RainViewer's z=7 ceiling).
   String tileUrlTemplate(
     RainViewerManifest manifest,
     RainViewerFrame frame, {
-    int size = 256,
-    int colorScheme = 2,
+    int size = 512,
+    int colorScheme = 3,
     bool smooth = true,
     bool showSnow = true,
   }) {

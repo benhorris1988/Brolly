@@ -2,11 +2,17 @@
 
 > The forecast, without the noise.
 
-Brolly is an ad-free, tracking-free weather and radar app for the UK (with
-global fallback). It replicates the core experience of "Weather & Radar"
-— animated precipitation radar, current conditions, multi-day forecast,
-and Met Office severe weather warnings — without any ads, analytics,
-accounts, or paywalls.
+Brolly is a tracking-free weather and radar app for the UK (with global
+fallback). It replicates the core experience of "Weather & Radar" — animated
+precipitation radar, current conditions, multi-day forecast, and Met Office
+severe weather warnings — with no analytics, no accounts, and no paywalls.
+
+Play Store builds carry a single banner ad at the bottom of the screen. You
+can build an ad-free APK for personal use with
+`flutter build apk --dart-define=ADS_ENABLED=false`.
+
+See [docs/PUBLISHING.md](docs/PUBLISHING.md) for the full Play Store release
+process (signing keys, AdMob, MapTiler, privacy policy).
 
 - **Forecasts:** Met Office DataHub (primary, UK) + Open-Meteo (fallback / global)
 - **Radar:** RainViewer animated precipitation tiles (no key required)

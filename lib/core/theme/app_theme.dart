@@ -4,14 +4,22 @@ import 'package:flutter/material.dart';
 class BrollyColors {
   BrollyColors._();
 
-  /// Deep British-rainy-day blue — primary brand.
-  static const Color brandBlue = Color(0xFF1E5A8E);
+  /// Vivid sky blue — primary brand. Lifted from the deep navy original
+  /// to read brighter and more energetic in the light theme.
+  static const Color brandBlue = Color(0xFF1976D2);
 
   /// Darker brand blue for dark-mode surfaces.
   static const Color brandBlueDark = Color(0xFF0B2E4E);
 
   /// Warm amber — used for warnings and CTAs.
   static const Color brandAmber = Color(0xFFF5A623);
+
+  /// Soft sunshine accent for highlights, day-time chips, and selected day.
+  static const Color brandYellow = Color(0xFFFFC857);
+
+  /// Subtle background tint behind the scaffold in light mode — keeps the
+  /// surface from feeling stark white.
+  static const Color lightSurface = Color(0xFFF1F5FA);
 
   /// Severe weather warning levels.
   static const Color warningYellow = Color(0xFFFFC107);
@@ -29,36 +37,74 @@ class AppTheme {
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: BrollyColors.brandBlue,
       brightness: brightness,
+      secondary: BrollyColors.brandYellow,
     );
 
     final TextTheme baseText = brightness == Brightness.dark
         ? ThemeData.dark(useMaterial3: true).textTheme
         : ThemeData.light(useMaterial3: true).textTheme;
 
+    final Color scaffold = brightness == Brightness.light
+        ? BrollyColors.lightSurface
+        : scheme.surface;
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       brightness: brightness,
-      scaffoldBackgroundColor: scheme.surface,
+      scaffoldBackgroundColor: scaffold,
       appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
-        foregroundColor: scheme.onSurface,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
         elevation: 0,
         centerTitle: false,
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        indicatorColor: scheme.primaryContainer,
-        labelTextStyle: WidgetStateProperty.all(
-          baseText.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+        iconTheme: IconThemeData(color: scheme.onPrimary),
+        titleTextStyle: baseText.titleLarge?.copyWith(
+          color: scheme.onPrimary,
+          fontWeight: FontWeight.w600,
         ),
       ),
-      cardTheme: CardTheme(
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surface,
+        indicatorColor: scheme.primaryContainer,
+        iconTheme: WidgetStateProperty.resolveWith<IconThemeData?>(
+          (Set<WidgetState> states) {
+            final bool selected = states.contains(WidgetState.selected);
+            return IconThemeData(
+              color: selected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
+            );
+          },
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>(
+          (Set<WidgetState> states) {
+            final bool selected = states.contains(WidgetState.selected);
+            return baseText.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: selected ? scheme.primary : scheme.onSurfaceVariant,
+            );
+          },
+        ),
+      ),
+      cardTheme: CardThemeData(
         elevation: 0,
         color: scheme.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         margin: EdgeInsets.zero,
+      ),
+      dividerTheme: DividerThemeData(
+        color: brightness == Brightness.light
+            ? scheme.outlineVariant.withValues(alpha: 0.6)
+            : scheme.outlineVariant,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
       ),
       textTheme: baseText.copyWith(
         displayLarge: baseText.displayLarge?.copyWith(

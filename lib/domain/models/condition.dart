@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_icons/weather_icons.dart';
 
 /// Coarse weather condition categories — used to pick an icon and a short label.
 /// Derived from provider-specific codes at the repository edge so the UI doesn't
@@ -51,31 +52,82 @@ extension WeatherConditionX on WeatherCondition {
     }
   }
 
-  IconData get icon {
+  /// Daytime weather_icons glyph for this condition.
+  IconData get icon => iconFor(isNight: false);
+
+  /// Pick a glyph that matches the time of day. Switches sun-based icons
+  /// to their moon variants at night.
+  IconData iconFor({required bool isNight}) {
     switch (this) {
       case WeatherCondition.clear:
-        return Icons.wb_sunny_outlined;
+        return isNight ? WeatherIcons.night_clear : WeatherIcons.day_sunny;
       case WeatherCondition.partlyCloudy:
-        return Icons.cloud_queue;
+        return isNight
+            ? WeatherIcons.night_alt_cloudy
+            : WeatherIcons.day_cloudy;
       case WeatherCondition.cloudy:
+        return WeatherIcons.cloud;
       case WeatherCondition.overcast:
-        return Icons.cloud_outlined;
+        return WeatherIcons.cloudy;
       case WeatherCondition.fog:
-        return Icons.foggy;
+        return WeatherIcons.fog;
       case WeatherCondition.drizzle:
-        return Icons.grain;
+        return WeatherIcons.sprinkle;
       case WeatherCondition.rain:
+        return WeatherIcons.rain;
       case WeatherCondition.heavyRain:
+        return WeatherIcons.rain_wind;
       case WeatherCondition.showers:
-        return Icons.water_drop_outlined;
+        return isNight
+            ? WeatherIcons.night_alt_showers
+            : WeatherIcons.day_showers;
       case WeatherCondition.sleet:
-        return Icons.ac_unit;
+        return WeatherIcons.sleet;
       case WeatherCondition.snow:
-        return Icons.ac_unit_outlined;
+        return WeatherIcons.snow;
       case WeatherCondition.thunderstorm:
-        return Icons.thunderstorm_outlined;
+        return isNight
+            ? WeatherIcons.night_alt_thunderstorm
+            : WeatherIcons.day_thunderstorm;
       case WeatherCondition.unknown:
-        return Icons.help_outline;
+        return WeatherIcons.na;
+    }
+  }
+
+  /// Tint for the icon — gives each condition a recognisable colour rather
+  /// than the monochrome black/white of the weather_icons font.
+  Color iconColor({required bool isNight}) {
+    switch (this) {
+      case WeatherCondition.clear:
+        return isNight
+            ? const Color(0xFFB0C4DE) // moon-silver
+            : const Color(0xFFFFB300); // bright sun amber
+      case WeatherCondition.partlyCloudy:
+        return isNight
+            ? const Color(0xFF8FA6C4)
+            : const Color(0xFF4FA3D1); // sun behind cloud blue
+      case WeatherCondition.cloudy:
+        return const Color(0xFF607D8B);
+      case WeatherCondition.overcast:
+        return const Color(0xFF455A64);
+      case WeatherCondition.fog:
+        return const Color(0xFF90A4AE);
+      case WeatherCondition.drizzle:
+        return const Color(0xFF4FC3F7);
+      case WeatherCondition.rain:
+        return const Color(0xFF1E88E5);
+      case WeatherCondition.heavyRain:
+        return const Color(0xFF1565C0);
+      case WeatherCondition.showers:
+        return const Color(0xFF29B6F6);
+      case WeatherCondition.sleet:
+        return const Color(0xFF80DEEA);
+      case WeatherCondition.snow:
+        return const Color(0xFFB3E5FC);
+      case WeatherCondition.thunderstorm:
+        return const Color(0xFF7B1FA2);
+      case WeatherCondition.unknown:
+        return const Color(0xFF9E9E9E);
     }
   }
 }

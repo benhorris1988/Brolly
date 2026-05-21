@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'connection/native.dart'
+    if (dart.library.html) 'connection/web.dart' as connection;
 
 part 'db.g.dart';
 
@@ -54,10 +52,4 @@ class BrollyDatabase extends _$BrollyDatabase {
           .go();
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final Directory dir = await getApplicationDocumentsDirectory();
-    final File file = File(p.join(dir.path, 'brolly.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
-}
+DatabaseConnection _openConnection() => connection.openConnection();

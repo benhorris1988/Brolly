@@ -159,7 +159,118 @@ class WeatherRepository {
       current: current,
       hourly: hourly.take(48).toList(growable: false),
       daily: daily.take(7).toList(growable: false),
+      minutely: _expandOpenMeteoMinutely(r.minutely15),
     );
+  }
+
+  /// Sample a [gridSize]×[gridSize] grid of points around (centerLat,
+  /// centerLon) and fetch each one's next [hours] hours of precipitation
+  /// forecast from Open-Meteo. Returns a [PrecipGrid] suitable for
+  /// rendering as a circle overlay on the radar map.
+  ///
+  /// Open-Meteo's per-IP quota is generous (~10k/day) so 25 parallel calls
+  /// per refresh is well within bounds.
+  Future<PrecipGrid> getPrecipGrid({
+    required double centerLat,
+    required double centerLon,
+    int gridSize = 5,
+    double latSpanDeg = 1.6,
+    double lonSpanDeg = 2.4,
+    int hours = 6,
+  }) async {
+    final List<({double lat, double lon})> points =
+        <({double lat, double lon})>[];
+    final double latStep = latSpanDeg / (gridSize - 1);
+    final double lonStep = lonSpanDeg / (gridSize - 1);
+    final double latStart = centerLat - latSpanDeg / 2;
+    final double lonStart = centerLon - lonSpanDeg / 2;
+    for (int i = 0; i < gridSize; i++) {
+      for (int j = 0; j < gridSize; j++) {
+        points.add((lat: latStart + i * latStep, lon: lonStart + j * lonStep));
+      }
+    }
+
+    // Ask for a few hours' headroom so we can drop the past hour cleanly.
+    final int requestHours = hours + 2;
+    // Per-point error tolerance: if one of the 25 calls fails (transient
+    // network blip, parse error from a server-side change, etc.) we still
+    // return the grid with the surviving points instead of erroring the
+    // whole forecast.
+    final List<OpenMeteoForecastResponse?> responses = await Future.wait(
+      points.map((({double lat, double lon}) p) async {
+        try {
+          return await _openMeteo.getHourlyPrecipOnly(
+            latitude: p.lat,
+            longitude: p.lon,
+            forecastHours: requestHours,
+          );
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+
+    // Pick the hourly buckets that are *ahead of* "now". All grid points
+    // share the same timezone (`auto` → user-local) so their `time` arrays
+    // align; we read the timeline from the first non-empty response.
+    final DateTime now = DateTime.now();
+    List<DateTime> selectedHours = const <DateTime>[];
+    List<int> selectedIndices = const <int>[];
+    for (final OpenMeteoForecastResponse? r in responses) {
+      if (r == null) continue;
+      final OpenMeteoHourly? h = r.hourly;
+      if (h == null) continue;
+      final List<DateTime> all =
+          h.time.map((String s) => DateTime.parse(s).toLocal()).toList();
+      final List<int> idx = <int>[];
+      for (int i = 0; i < all.length && idx.length < hours; i++) {
+        if (all[i].isAfter(now)) idx.add(i);
+      }
+      if (idx.isNotEmpty) {
+        selectedIndices = idx;
+        selectedHours = idx.map((int i) => all[i]).toList();
+        break;
+      }
+    }
+    if (selectedHours.isEmpty) {
+      return PrecipGrid(
+        fetchedAt: DateTime.now(),
+        hours: const <DateTime>[],
+        points: const <PrecipGridPoint>[],
+      );
+    }
+
+    final List<PrecipGridPoint> gridPoints = <PrecipGridPoint>[];
+    for (int p = 0; p < responses.length; p++) {
+      final OpenMeteoForecastResponse? r = responses[p];
+      if (r == null) continue; // skip points whose request failed
+      final List<double>? precip = r.hourly?.precipitation;
+      final List<double> series = selectedIndices
+          .map((int i) => (precip != null && i < precip.length) ? precip[i] : 0)
+          .map((num v) => v.toDouble())
+          .toList();
+      gridPoints.add(PrecipGridPoint(
+        latitude: points[p].lat,
+        longitude: points[p].lon,
+        precipMmPerHour: series,
+      ));
+    }
+
+    return PrecipGrid(
+      fetchedAt: DateTime.now(),
+      hours: selectedHours,
+      points: gridPoints,
+    );
+  }
+
+  MinutelyPrecip? _expandOpenMeteoMinutely(OpenMeteoMinutely15? m) {
+    if (m == null) return null;
+    final List<double>? precip = m.precipitation;
+    if (precip == null || precip.isEmpty) return null;
+    final List<DateTime> times = m.time
+        .map((String s) => DateTime.parse(s).toLocal())
+        .toList(growable: false);
+    return MinutelyPrecip(times: times, precipitationMm: precip);
   }
 
   List<HourlyForecast> _expandOpenMeteoHourly(OpenMeteoHourly? h) {

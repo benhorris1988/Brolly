@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/forecast/forecast_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/radar/radar_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/warnings/warnings_screen.dart';
+import '../ads/banner_ad_view.dart';
 
 /// Wraps the [GoRouter] so it can be exposed through Riverpod.
 class GoRouterConfig {
@@ -23,11 +23,13 @@ class BrollyRoutes {
   BrollyRoutes._();
   static const String home = '/';
   static const String radar = '/radar';
-  static const String forecast = '/forecast';
   static const String warnings = '/warnings';
   static const String settings = '/settings';
 
-  static const List<String> ordered = <String>[home, radar, forecast, warnings, settings];
+  // Warnings is registered as a route but intentionally not in `ordered`
+  // so it doesn't appear in the bottom nav for now. The route + screen code
+  // are kept so it can be re-enabled later by adding `warnings` back here.
+  static const List<String> ordered = <String>[home, radar, settings];
 }
 
 GoRouter _buildRouter() {
@@ -48,11 +50,6 @@ GoRouter _buildRouter() {
             path: BrollyRoutes.radar,
             pageBuilder: (BuildContext c, GoRouterState s) =>
                 const NoTransitionPage<void>(child: RadarScreen()),
-          ),
-          GoRoute(
-            path: BrollyRoutes.forecast,
-            pageBuilder: (BuildContext c, GoRouterState s) =>
-                const NoTransitionPage<void>(child: ForecastScreen()),
           ),
           GoRoute(
             path: BrollyRoutes.warnings,
@@ -86,16 +83,6 @@ class _RootScaffold extends StatelessWidget {
       label: 'Radar',
     ),
     NavigationDestination(
-      icon: Icon(Icons.calendar_today_outlined),
-      selectedIcon: Icon(Icons.calendar_today),
-      label: 'Forecast',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.warning_amber_outlined),
-      selectedIcon: Icon(Icons.warning_amber),
-      label: 'Warnings',
-    ),
-    NavigationDestination(
       icon: Icon(Icons.settings_outlined),
       selectedIcon: Icon(Icons.settings),
       label: 'Settings',
@@ -120,10 +107,17 @@ class _RootScaffold extends StatelessWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        destinations: _destinations,
-        onDestinationSelected: (int i) => context.go(BrollyRoutes.ordered[i]),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const HomeBannerAd(),
+          NavigationBar(
+            selectedIndex: index,
+            destinations: _destinations,
+            onDestinationSelected:
+                (int i) => context.go(BrollyRoutes.ordered[i]),
+          ),
+        ],
       ),
     );
   }

@@ -16,6 +16,7 @@ class _Keys {
   static const String tempUnit = 'settings.temperatureUnit';
   static const String windUnit = 'settings.windSpeedUnit';
   static const String precipUnit = 'settings.precipitationUnit';
+  static const String adsEnabled = 'settings.adsEnabled';
 }
 
 // ---- Theme ----------------------------------------------------------------
@@ -27,12 +28,13 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 
   static ThemeMode _load(SharedPreferences p) {
     switch (p.getString(_Keys.themeMode)) {
-      case 'light':
-        return ThemeMode.light;
+      case 'system':
+        return ThemeMode.system;
       case 'dark':
         return ThemeMode.dark;
+      case 'light':
       default:
-        return ThemeMode.system;
+        return ThemeMode.light;
     }
   }
 
@@ -109,3 +111,26 @@ final StateNotifierProvider<UnitPreferencesNotifier, UnitPreferences>
     StateNotifierProvider<UnitPreferencesNotifier, UnitPreferences>(
         (Ref ref) =>
             UnitPreferencesNotifier(ref.watch(sharedPreferencesProvider)));
+
+// ---- Ads ------------------------------------------------------------------
+
+/// User-controlled toggle for whether the in-app banner should render.
+/// Default: false (hidden). When the user flips it on, ads appear.
+/// The compile-time `kAdsEnabled` flag and the runtime `adsEnabledProvider`
+/// must BOTH be true for the banner to show — letting you ship an ad-free
+/// build with `--dart-define=ADS_ENABLED=false` regardless of the toggle.
+class AdsEnabledNotifier extends StateNotifier<bool> {
+  AdsEnabledNotifier(this._prefs)
+      : super(_prefs.getBool(_Keys.adsEnabled) ?? true);
+
+  final SharedPreferences _prefs;
+
+  Future<void> set(bool value) async {
+    state = value;
+    await _prefs.setBool(_Keys.adsEnabled, value);
+  }
+}
+
+final StateNotifierProvider<AdsEnabledNotifier, bool> adsEnabledProvider =
+    StateNotifierProvider<AdsEnabledNotifier, bool>(
+        (Ref ref) => AdsEnabledNotifier(ref.watch(sharedPreferencesProvider)));

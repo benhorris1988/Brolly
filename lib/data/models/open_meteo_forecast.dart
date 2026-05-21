@@ -9,6 +9,7 @@ class OpenMeteoForecastResponse {
     required this.longitude,
     required this.timezone,
     this.current,
+    this.minutely15,
     this.hourly,
     this.daily,
   });
@@ -17,12 +18,29 @@ class OpenMeteoForecastResponse {
   final double longitude;
   final String timezone;
   final OpenMeteoCurrent? current;
+  @JsonKey(name: 'minutely_15')
+  final OpenMeteoMinutely15? minutely15;
   final OpenMeteoHourly? hourly;
   final OpenMeteoDaily? daily;
 
   factory OpenMeteoForecastResponse.fromJson(Map<String, dynamic> json) =>
       _$OpenMeteoForecastResponseFromJson(json);
   Map<String, dynamic> toJson() => _$OpenMeteoForecastResponseToJson(this);
+}
+
+@JsonSerializable()
+class OpenMeteoMinutely15 {
+  const OpenMeteoMinutely15({
+    required this.time,
+    this.precipitation,
+  });
+
+  final List<String> time;
+  final List<double>? precipitation;
+
+  factory OpenMeteoMinutely15.fromJson(Map<String, dynamic> json) =>
+      _$OpenMeteoMinutely15FromJson(json);
+  Map<String, dynamic> toJson() => _$OpenMeteoMinutely15ToJson(this);
 }
 
 @JsonSerializable()

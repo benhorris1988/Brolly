@@ -95,6 +95,16 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
+          _SectionHeader(label: 'Adverts'),
+          SwitchListTile(
+            title: const Text('Show ads'),
+            subtitle: const Text(
+                'When on, a small banner appears at the bottom of the app.'),
+            value: ref.watch(adsEnabledProvider),
+            onChanged: (bool v) =>
+                ref.read(adsEnabledProvider.notifier).set(v),
+          ),
+          const Divider(),
           _SectionHeader(label: 'Saved locations'),
           saved.when(
             data: (List<SavedLocation> list) {
@@ -137,7 +147,7 @@ class SettingsScreen extends ConsumerWidget {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Brolly — the forecast, without the noise.\n'
-              'No ads. No tracking. No accounts.',
+              'No tracking. No accounts.',
               textAlign: TextAlign.center,
             ),
           ),
